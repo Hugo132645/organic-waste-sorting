@@ -673,31 +673,22 @@ Diffusion Policy worked better than ACT for the final robot behavior. It produce
 
 ---
 
-## SmolVLA Experiments
+## SmolVLA Experiment
 
-SmolVLA was tested as a language-conditioned vision-language-action policy.
+After training ACT and Diffusion Policy, we also experimented with **SmolVLA**, a vision-language-action policy. The motivation was to test whether a language-conditioned model could learn both sorting tasks from the task instructions:
 
-Initial debug command:
-
-```bash
-lerobot-train \
-  --policy.path=lerobot/smolvla_base \
-  --dataset.repo_id=${DATASET_REPO_ID} \
-  --output_dir=outputs/train/debug_smolvla_food_sorting \
-  --job_name=debug_smolvla_food_sorting \
-  --policy.device=cuda \
-  --wandb.enable=false \
-  --steps=100 \
-  --batch_size=1 \
-  --num_workers=0 \
-  --log_freq=20 \
-  --save_checkpoint=true \
-  --save_freq=100 \
-  --policy.repo_id=${HF_USER}/debug_smolvla_food_sorting \
-  --policy.push_to_hub=false
+```text
+Place chocolate bar on the blue non-organic bin.
+Place branch on the red organic bin.
 ```
 
-The pretrained SmolVLA policy expected camera names:
+Unlike the separate Diffusion Policies, SmolVLA was intended to learn a single shared policy that could use the language instruction to decide which behavior to execute.
+
+---
+
+### SmolVLA Training
+
+The first SmolVLA training attempt failed because the pretrained SmolVLA configuration expected camera names such as:
 
 ```text
 observation.images.camera1
@@ -705,14 +696,14 @@ observation.images.camera2
 observation.images.camera3
 ```
 
-Our dataset used:
+while our dataset used:
 
 ```text
 observation.images.front
 observation.images.wrist
 ```
 
-The fix was to use `--rename_map`:
+We fixed this using `--rename_map`, mapping our dataset cameras to the names expected by SmolVLA:
 
 ```bash
 lerobot-train \
@@ -726,96 +717,81 @@ lerobot-train \
   --policy.num_vlm_layers=8 \
   --policy.train_expert_only=true \
   --policy.freeze_vision_encoder=true \
-  --output_dir=outputs/train/debug_smolvla_food_sorting \
-  --job_name=debug_smolvla_food_sorting \
+  --output_dir=outputs/train/smolvla_food_sorting_5k \
+  --job_name=smolvla_food_sorting_5k \
   --policy.device=cuda \
   --wandb.enable=false \
-  --steps=100 \
+  --steps=5000 \
   --batch_size=1 \
   --num_workers=0 \
-  --log_freq=20 \
+  --log_freq=100 \
   --save_checkpoint=true \
-  --save_freq=100 \
-  --policy.repo_id=${HF_USER}/debug_smolvla_food_sorting \
+  --save_freq=1000 \
+  --policy.repo_id=${HF_USER}/smolvla_food_sorting_5k \
   --policy.push_to_hub=false
 ```
 
-SmolVLA was kept as experimental because ACT and Diffusion Policy were more practical for the available time and hardware.
+Because of limited time and GPU resources, we trained SmolVLA for only **5,000 steps**. We also reduced the number of VLM layers and trained only the expert part of the model to make the experiment feasible on the available hardware.
 
 ---
 
-## High-Level Object Selection
+### SmolVLA Rollout
 
-For a fully autonomous version, the system needs a high-level object selector.
+The trained SmolVLA checkpoint was tested with:
 
-Planned architecture:
-
-```text
-camera frame
-    ↓
-YOLO-E / VLM / classifier
-    ↓
-detected object class
-    ↓
-select correct LeRobot policy
-    ↓
-run rollout
+```bash
+lerobot-rollout \
+  --policy.path=outputs/train/smolvla_food_sorting_5k/checkpoints/last/pretrained_model \
+  --robot.type=so101_follower \
+  --robot.port=/dev/ttyACM0 \
+  --robot.id=FOLLOWER \
+  --robot.calibration_dir=configs/calibration/robots \
+  --robot.max_relative_target=5.0 \
+  --robot.cameras='{
+    camera1: {type: opencv, index_or_path: /dev/video0, width: 1920, height: 1080, fps: 5, warmup_s: 3},
+    camera2: {type: opencv, index_or_path: /dev/video3, width: 640, height: 480, fps: 15, warmup_s: 3}
+  }' \
+  --task="Place chocolate bar on the blue non-organic bin." \
+  --fps=5 \
+  --display_data=false
 ```
 
-Example:
+For the branch task, only the task instruction was changed:
 
-```text
-chocolate bar detected → run diffusion_chocolate_blue_wrist_30k
-branch detected        → run diffusion_branch_red_wrist_30k
+```bash
+--task="Place branch on the red organic bin."
 ```
-
-For the hackathon version, task selection can be manual or semi-automatic. The manipulation policies and robot rollouts are real.
 
 ---
 
-## Media Conversion
+### SmolVLA Result
 
-The LeRobot dataset visualizer recordings were saved as `.webm` files and converted to GIFs:
+SmolVLA successfully trained and could be loaded for rollout, but it did **not reliably grasp the object** during the final physical tests.
 
-```bash
-ffmpeg -i media/raw/episode30_front.webm \
-  -vf "fps=8,scale=720:-1" \
-  media/episode30_front.gif
+The likely reasons were:
 
-ffmpeg -i media/raw/episode30_wrist.webm \
-  -vf "fps=8,scale=720:-1" \
-  media/episode30_wrist.gif
+- SmolVLA was trained for only around **5,000 steps**
+- the dataset was small, with only **60 total demonstrations**
+- the task required precise real-world grasping, not just high-level object understanding
+- we had limited compute and reduced the number of VLM layers
+- the model had less time to adapt to the robot action distribution
+- real rollout conditions were sensitive to object position, camera view, and gripper alignment
 
-ffmpeg -i media/raw/episode30_3d_view.webm \
-  -vf "fps=8,scale=720:-1" \
-  media/episode30_3d_view.gif
+Because of the hackathon time constraints, SmolVLA was kept as an experimental extension rather than the final demo policy.
 
-ffmpeg -i media/raw/episode30_graph.webm \
-  -vf "fps=8,scale=720:-1" \
-  media/episode30_graph.gif
-```
+The best-performing policy for the physical robot demo was **Diffusion Policy**, especially when trained separately for each task using the wrist camera.
 
-The rollout demonstrations were kept as compressed MP4 videos:
+---
 
-```bash
-ffmpeg -i media/raw/diffusion_branch_raw.mp4 \
-  -vf "scale=720:-1" \
-  -c:v libx264 \
-  -crf 28 \
-  -preset fast \
-  -pix_fmt yuv420p \
-  -movflags +faststart \
-  media/diffusion_branch_rollout.mp4
+### SmolVLA Summary
 
-ffmpeg -i media/raw/diffusion_chocolate_raw.mp4 \
-  -vf "scale=720:-1" \
-  -c:v libx264 \
-  -crf 28 \
-  -preset fast \
-  -pix_fmt yuv420p \
-  -movflags +faststart \
-  media/diffusion_chocolate_rollout.mp4
-```
+| Model | Training setup | Result |
+|---|---|---|
+| ACT | Full dataset, two cameras, 20k steps | Controlled the robot but grasp was unstable |
+| Diffusion Policy | Separate wrist-camera policies for each task, 30k steps | Best physical rollout performance |
+| SmolVLA | Full dataset, language-conditioned, 5k steps | Trained and loaded, but did not reliably grasp |
+
+SmolVLA remains a promising direction for a future version of the project, especially with more demonstrations, longer training, and a stronger high-level object-selection pipeline.
 
 ---
 
