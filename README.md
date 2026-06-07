@@ -21,9 +21,7 @@ setup → calibration → teleoperation → camera integration → data collecti
 
 The branch policy was trained with Diffusion Policy using wrist-camera observations. It produced smoother behavior than ACT and performed better during physical rollout.
 
-<video src="media/diffusion_branch_rollout.mp4" controls width="720"></video>
-
-[Watch branch diffusion rollout](media/diffusion_branch_rollout.mp4)
+https://github.com/user-attachments/assets/7d13a941-e416-4c35-ae9c-0061d1dc8c07
 
 ---
 
