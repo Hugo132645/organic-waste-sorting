@@ -642,30 +642,13 @@ lerobot-rollout \
   --robot.port=/dev/ttyACM0 \
   --robot.id=FOLLOWER \
   --robot.calibration_dir=configs/calibration/robots \
-  --robot.max_relative_target=5.0 \
   --robot.cameras='{
-    wrist: {type: opencv, index_or_path: /dev/video3, width: 640, height: 480, fps: 15, warmup_s: 3}
+    wrist: {type: opencv, index_or_path: /dev/video3, width: 640, height: 480, fps: 30, warmup_s: 3}
   }' \
   --task="Place branch on the red organic bin." \
   --fps=15 \
   --display_data=false
 ```
-
-## Diffusion Result
-
-Diffusion Policy worked better than ACT for the final robot behavior. It produced smoother movement and better grasping behavior.
-
-### Branch → Red Organic Bin
-
-<video src="media/diffusion_branch_rollout.mp4" controls width="720"></video>
-
-[Watch branch diffusion rollout](media/diffusion_branch_rollout.mp4)
-
-### Chocolate Bar → Blue Non-Organic Bin
-
-<video src="media/diffusion_chocolate_rollout.mp4" controls width="720"></video>
-
-[Watch chocolate diffusion rollout](media/diffusion_chocolate_rollout.mp4)
 
 ---
 
@@ -742,13 +725,12 @@ lerobot-rollout \
   --robot.port=/dev/ttyACM0 \
   --robot.id=FOLLOWER \
   --robot.calibration_dir=configs/calibration/robots \
-  --robot.max_relative_target=5.0 \
   --robot.cameras='{
     camera1: {type: opencv, index_or_path: /dev/video0, width: 1920, height: 1080, fps: 5, warmup_s: 3},
-    camera2: {type: opencv, index_or_path: /dev/video3, width: 640, height: 480, fps: 15, warmup_s: 3}
+    camera2: {type: opencv, index_or_path: /dev/video3, width: 640, height: 480, fps: 30, warmup_s: 3}
   }' \
   --task="Place chocolate bar on the blue non-organic bin." \
-  --fps=5 \
+  --fps=10 \
   --display_data=false
 ```
 
@@ -799,15 +781,13 @@ SmolVLA remains a promising direction for a future version of the project, espec
 ├── HONESTY.md
 ├── LICENSE
 ├── .gitignore
-├── commands/
-├── media/
-│   ├── episode30_front.gif
-│   ├── episode30_wrist.gif
-│   ├── episode30_3d_view.gif
-│   ├── episode30_graph.gif
-│   ├── diffusion_branch_rollout.mp4
-│   └── diffusion_chocolate_rollout.mp4
-└── notes/
+└── media/
+    ├── episode30_front.gif
+    ├── episode30_wrist.gif
+    ├── episode30_3d_view.gif
+    ├── episode30_graph.gif
+    ├── diffusion_branch_rollout.mp4
+    └── diffusion_chocolate_rollout.mp4
 ```
 
 ---
@@ -816,7 +796,7 @@ SmolVLA remains a promising direction for a future version of the project, espec
 
 - ACT learned the general trajectory but did not grasp reliably.
 - Diffusion Policy required wrist-only training because the original two cameras had different resolutions.
-- The system currently uses manual or semi-automatic task selection.
+- The system currently uses manual task selection.
 - YOLO-E or another classifier can be added to choose the correct policy automatically.
 - Camera device names changed between `/dev/video2` and `/dev/video3`.
 - The front camera ran at 5 FPS, which constrained rollout speed.
@@ -830,7 +810,7 @@ SmolVLA remains a promising direction for a future version of the project, espec
 
 This repository is released under the MIT License.
 
-External dependencies such as Hugging Face LeRobot, ACT, Diffusion Policy, SmolVLA, and YOLO-E retain their original licenses.
+External dependencies such as Hugging Face LeRobot, ACT, Diffusion Policy, and SmolVLA retain their original licenses.
 
 ---
 
@@ -845,4 +825,3 @@ This project uses:
 - ACT
 - Diffusion Policy
 - SmolVLA
-- Ultralytics YOLO-E for planned object selection
