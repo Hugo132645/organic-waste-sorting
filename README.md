@@ -21,7 +21,7 @@ setup → calibration → teleoperation → camera integration → data collecti
 
 The branch policy was trained with Diffusion Policy using wrist-camera observations. It produced smoother behavior than ACT and performed better during physical rollout.
 
-https://github.com/user-attachments/assets/7d13a941-e416-4c35-ae9c-0061d1dc8c07
+https://github.com/user-attachments/assets/ac470607-a84f-4dcd-8528-1186baf9404c
 
 ---
 
@@ -29,9 +29,7 @@ https://github.com/user-attachments/assets/7d13a941-e416-4c35-ae9c-0061d1dc8c07
 
 The chocolate policy was trained with Diffusion Policy using wrist-camera observations.
 
-<video src="media/diffusion_chocolate_rollout.mp4" controls width="720"></video>
-
-[Watch chocolate diffusion rollout](media/diffusion_chocolate_rollout.mp4)
+https://github.com/user-attachments/assets/55ee6f85-ef9c-47c1-807d-ca6abe084526
 
 ---
 
