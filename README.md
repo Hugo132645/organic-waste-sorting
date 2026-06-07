@@ -10,7 +10,7 @@ The goal of this project is to teach a robot arm to sort objects into the correc
 This repository documents the full process from hardware setup to policy rollout:
 
 ```text
-setup → calibration → teleoperation → camera integration → data collection → Hugging Face dataset upload → ACT training → Diffusion Policy training → real robot rollout
+setup → calibration → teleoperation → camera integration → data collection → Hugging Face dataset upload → ACT training → Diffusion Policy training → SmolVLA training → real robot rollout
 ```
 
 ---
@@ -45,15 +45,15 @@ Episode 30 shows the branch sorting task:
 
 The episode was recorded in LeRobot format with synchronized camera observations, robot states, actions, and task labels.
 
-### Front Camera
+### 3D View
 
 ![Episode 30 front camera](media/episode30_front.gif)
 
-### Wrist Camera
+### Front Camera
 
 ![Episode 30 wrist camera](media/episode30_wrist.gif)
 
-### 3D View
+### Wrist Camera
 
 ![Episode 30 3D view](media/episode30_3d_view.gif)
 
