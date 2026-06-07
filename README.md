@@ -19,7 +19,7 @@ setup → calibration → teleoperation → camera integration → data collecti
 
 ### Diffusion Policy: Branch → Red Organic Bin
 
-The branch policy was trained with Diffusion Policy using wrist-camera observations. It produced smoother behavior than ACT and performed better during physical rollout.
+The branch policy was trained with Diffusion Policy using wrist-camera observations. It produced smoother behavior than ACT and performed better during physical rollout than SmolVLA.
 
 https://github.com/user-attachments/assets/ac470607-a84f-4dcd-8528-1186baf9404c
 
@@ -76,7 +76,6 @@ The episode was recorded in LeRobot format with synchronized camera observations
 | Diffusion Policy training | Complete |
 | Diffusion rollout | Best-performing policy |
 | SmolVLA | Experimental |
-| YOLO-E object selector | Planned / optional |
 
 ---
 
@@ -86,8 +85,8 @@ The project used:
 
 - SO-101 follower robotic arm
 - SO-101 leader teleoperation arm
-- Front USB camera
-- Wrist USB camera
+- Front OpenCV camera
+- Wrist OpenCV camera
 - Ubuntu/Linux workstation
 - NVIDIA GPU for training
 - Hugging Face LeRobot
@@ -104,7 +103,6 @@ wrist camera:
   device: /dev/video2 or /dev/video3 depending on Linux camera mapping
   resolution: 640x480
   fps during recording: 30
-  fps during rollout: 15
 ```
 
 Camera device numbers changed between runs, so we used:
@@ -357,6 +355,8 @@ python src/lerobot/scripts/lerobot_record.py \
   --display_data=false
 ```
 
+Make sure that on the first run --resume is set to false.
+
 ### Task 2: Branch → Red Organic Bin
 
 ```bash
@@ -491,6 +491,7 @@ lerobot-train \
   --policy.chunk_size=50 \
   --policy.n_action_steps=50
 ```
+I recommend doing a debug step before committing to the training.
 
 Final ACT checkpoint:
 
@@ -509,10 +510,10 @@ lerobot-rollout \
   --robot.calibration_dir=configs/calibration/robots \
   --robot.cameras='{
     front: {type: opencv, index_or_path: /dev/video0, width: 1920, height: 1080, fps: 5, warmup_s: 3},
-    wrist: {type: opencv, index_or_path: /dev/video3, width: 640, height: 480, fps: 15, warmup_s: 3}
+    wrist: {type: opencv, index_or_path: /dev/video3, width: 640, height: 480, fps: 30, warmup_s: 3}
   }' \
   --task="Place chocolate bar on the blue non-organic bin." \
-  --fps=5 \
+  --fps=10 \
   --display_data=false
 ```
 
@@ -575,12 +576,11 @@ lerobot-rollout \
   --robot.port=/dev/ttyACM0 \
   --robot.id=FOLLOWER \
   --robot.calibration_dir=configs/calibration/robots \
-  --robot.max_relative_target=5.0 \
   --robot.cameras='{
-    wrist: {type: opencv, index_or_path: /dev/video3, width: 640, height: 480, fps: 15, warmup_s: 3}
+    wrist: {type: opencv, index_or_path: /dev/video3, width: 640, height: 480, fps: 30, warmup_s: 3}
   }' \
   --task="Place chocolate bar on the blue non-organic bin." \
-  --fps=5 \
+  --fps=10 \
   --display_data=false
 ```
 
@@ -647,7 +647,7 @@ lerobot-rollout \
     wrist: {type: opencv, index_or_path: /dev/video3, width: 640, height: 480, fps: 15, warmup_s: 3}
   }' \
   --task="Place branch on the red organic bin." \
-  --fps=5 \
+  --fps=15 \
   --display_data=false
 ```
 
