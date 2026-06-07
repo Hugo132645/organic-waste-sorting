@@ -165,11 +165,8 @@ The contribution of this repository is not a new implementation of ACT, Diffusio
   - Rollouts were manually supervised.
   - A real deployment would need collision checking, force limits, emergency stop integration, and safer motion constraints.
 
-- **Future improvement: train more demonstrations.**
+- **Future improvement: train more episodes.**
   - More demonstrations with varied object positions, lighting, orientations, and bin locations would improve robustness.
-
-- **Future improvement: unify perception and manipulation.**
-  - A complete version would combine object detection/classification with a policy selector and robust learned manipulation.
 
 ---
 
