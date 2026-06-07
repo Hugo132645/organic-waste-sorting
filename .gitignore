@@ -216,3 +216,52 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# LeRobot / AI and Robotics Project
+
+# Local LeRobot datasets and recordings
+data/
+datasets/
+
+# Training outputs, checkpoints, logs
+outputs/
+runs/
+wandb/
+checkpoints/
+logs/
+
+# Model weights / large ML files
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.onnx
+*.pkl
+*.joblib
+
+# Hugging Face / cache folders
+.cache/
+hf_cache/
+.huggingface/
+HF_HOME/
+
+# Local robot calibration files
+# Keep these ignored unless you intentionally want to publish calibration.
+configs/calibration/
+
+# Raw media files used before compression/conversion
+media/raw/
+
+# Large raw video formats
+*.avi
+*.mkv
+*.mov
+
+# Temporary ffmpeg outputs
+*_tmp.mp4
+*_compressed.mp4
+*_small.mp4
+
+# Local system files
+.DS_Store
+Thumbs.db
